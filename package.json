@@ -1,0 +1,27 @@
+{
+  "name": "bookdown",
+  "module": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "coverage": "vitest --coverage",
+    "lint": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.11.1",
+    "@types/bun": "latest",
+    "@vitest/coverage-v8": "2.1.2",
+    "globals": "^15.10.0",
+    "prettier": "^3.3.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/eslint__js": "^8.42.3",
+    "eslint": "^9.11.1",
+    "sade": "^1.8.1",
+    "vitest": "^2.1.2"
+  }
+}
