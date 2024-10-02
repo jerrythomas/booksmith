@@ -1,5 +1,8 @@
 # Bookdown
 
+[![Test Coverage][coverage_badge]][coverage_url]
+[![Maintainability][maintainability_badge]][maintainability_url]
+
 A different approach to writing documentation or books.
 
 Objective:
@@ -117,3 +120,8 @@ book-project/
 ```
 
 Different books can have different metadata and content structure. Adapters can be used to handle the conversion of the content to the desired output format.
+
+[coverage_badge]: https://api.codeclimate.com/v1/badges/2e17f2ef857dd66cc665/test_coverage
+[coverage_url]: https://codeclimate.com/github/jerrythomas/booksmith/test_coverage
+[maintainability_badge]: https://api.codeclimate.com/v1/badges/2e17f2ef857dd66cc665/maintainability
+[maintainability_url]: https://codeclimate.com/github/jerrythomas/booksmith/maintainability

@@ -17,7 +17,8 @@
     "format": "prettier --write .",
     "bump": "bumpp",
     "bump:next": "pnpm bump --next",
-    "release": "pnpm publish --access public"
+    "release": "pnpm publish --access public",
+    "coverage:lcov": "vitest run --coverage"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
