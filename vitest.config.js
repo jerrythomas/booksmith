@@ -7,7 +7,7 @@ export default defineConfig({
 			reporter: ['text', 'lcov', 'html'],
 			all: true,
 			include: ['src'],
-			exclude: ['spec']
+			exclude: ['spec', 'src/types.js']
 		}
 	}
 })

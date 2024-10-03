@@ -32,8 +32,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@lukeed/uuid": "^2.0.1",
     "@types/eslint__js": "^8.42.3",
     "eslint": "^9.11.1",
+    "jszip": "^3.10.1",
     "sade": "^1.8.1",
     "vitest": "^2.1.2"
   }

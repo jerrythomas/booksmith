@@ -29,3 +29,19 @@ export async function createFile(filePath, content) {
 	}
 	return result
 }
+
+/**
+ * Converts a date to the ISO 8601 format 'CCYY-MM-DDThh:mm:ssZ' without milliseconds.
+ *
+ * @param {Date|string|number} date - The date to convert. Can be a Date object, a date string, or a timestamp.
+ * @returns {string} - The date in ISO 8601 format without milliseconds.
+ */
+export function toEpubDateFormat(date) {
+	try {
+		const dateObj = new Date(date)
+		const isoString = dateObj.toISOString()
+		return `${isoString.slice(0, 19)}Z`
+	} catch (error) {
+		throw `Error converting date to EPUB format: ${error.message}`
+	}
+}

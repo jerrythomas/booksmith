@@ -29,3 +29,38 @@ export const DEFAULTS = {
 	config,
 	metadata
 }
+
+export const metadataMapping = [
+	{ key: 'title', tag: 'dc:title' },
+	{ key: 'author', tag: 'dc:creator', multiple: true, count: true },
+	{ key: 'description', tag: 'dc:description' },
+	{ key: 'audience', tag: 'meta', property: 'audience' },
+	{ key: 'genres', tag: 'meta', property: 'genre', multiple: true },
+	{ key: 'tags', tag: 'meta', property: 'tag', multiple: true },
+	{ key: 'keywords', tag: 'meta', property: 'keywords', join: true },
+	{ key: 'publishedOn', tag: 'dc:date' },
+	{ key: 'publisher', tag: 'dc:publisher' },
+	{ key: 'ISBN', tag: 'dc:identifier', scheme: 'ISBN' },
+	{ key: 'DOI', tag: 'dc:identifier', scheme: 'DOI' },
+	{ key: 'ASIN', tag: 'dc:identifier', scheme: 'ASIN' },
+	{ key: 'license', tag: 'dc:rights' },
+	{ key: 'language', tag: 'dc:language' },
+	{ key: 'series', tag: 'meta', property: 'series' },
+	{ key: 'seriesNumber', tag: 'meta', property: 'seriesNumber' },
+	{ key: 'seriesCount', tag: 'meta', property: 'seriesCount' }
+]
+
+export const EPUB_FILES = [
+	{ name: 'mimetype', content: 'application/epub+zip' },
+	{
+		name: 'META-INF/container.xml',
+		content: [
+			'<?xml version="1.0" encoding="UTF-8"?>',
+			'<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">',
+			' <rootfiles>',
+			'  <rootfile full-path="content.opf" media-type="application/oebps-package+xml"/>',
+			' </rootfiles>',
+			'</container>'
+		].join('\n')
+	}
+]

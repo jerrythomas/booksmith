@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs/promises'
 import path from 'path'
 import process from 'process'
-import { createFolder, createFile } from '../src/utils.js'
+import { createFolder, createFile, toEpubDateFormat } from '../src/utils.js'
 
 const testDir = path.join(process.cwd(), 'test-utils')
 
@@ -64,6 +64,33 @@ describe('utils', () => {
 			expect(error).not.toEqual(`Error creating file ${filePath}: File already exists`)
 			const fileContent = await fs.readFile(filePath, 'utf8')
 			expect(fileContent).toBe(content)
+		})
+	})
+
+	describe('toEpubDateFormat', () => {
+		it('should convert a Date object to ISO 8601 format without milliseconds', () => {
+			const date = new Date('2023-10-05T12:34:56Z')
+			const result = toEpubDateFormat(date)
+			expect(result).toBe('2023-10-05T12:34:56Z')
+		})
+
+		it('should convert a date string to ISO 8601 format without milliseconds', () => {
+			const dateString = '2023-10-05T12:34:56Z'
+			const result = toEpubDateFormat(dateString)
+			expect(result).toBe('2023-10-05T12:34:56Z')
+		})
+
+		it('should convert a timestamp to ISO 8601 format without milliseconds', () => {
+			const timestamp = Date.parse('2023-10-05T12:34:56Z')
+			const result = toEpubDateFormat(timestamp)
+			expect(result).toBe('2023-10-05T12:34:56Z')
+		})
+
+		it('should handle invalid dates gracefully', () => {
+			const invalidDate = 'invalid-date'
+			expect(() => toEpubDateFormat(invalidDate)).toThrow(
+				'Error converting date to EPUB format: Invalid time value'
+			)
 		})
 	})
 })

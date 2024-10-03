@@ -18,6 +18,7 @@
  * @property {string} audience        - The target audience of the book.
  * @property {string[]} [genres]      - Genres associated with the section.
  * @property {string[]} [tags]        - Tags associated with the section.
+ * @property {string[]} [keywords]      Keywords associated with the section.
  * @property {string} [publishedOn]   - The date the book was published.
  * @property {string} [publisher]     - The publisher of the book.
  * @property {string} [ISBN]          - The International Standard Book Number.
