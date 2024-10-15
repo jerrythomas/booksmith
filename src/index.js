@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 /* eslint-disable no-console */
+
 import sade from 'sade'
 import path from 'path'
 import fs from 'fs'
