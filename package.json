@@ -2,7 +2,7 @@
   "name": "booksmith",
   "module": "src/index.js",
   "type": "module",
-  "version": "1.0.0-next.0",
+  "version": "1.0.0-next.1",
   "description": "A simple bookdown generator",
   "author": "Jerry Thomas<me@jerrythomas.name>",
   "license": "MIT",
