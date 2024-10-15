@@ -45,3 +45,17 @@ export function toEpubDateFormat(date) {
 		throw `Error converting date to EPUB format: ${error.message}`
 	}
 }
+
+/**
+ * Sorts the content according to order or file name.
+ *
+ * @param {Array<Object>} content - The content to sort.
+ * @returns {Array<Object>} The sorted content.
+ */
+export function itemSorter(a, b) {
+	const order = (a.order ?? Infinity) - (b.order ?? Infinity)
+	if (order === 0) {
+		return a.file.localeCompare(b.file)
+	}
+	return order
+}

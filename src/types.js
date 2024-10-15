@@ -48,10 +48,11 @@
  * @property {number} order          - The order of the section.
  * @property {string} title          - The title of the section.
  * @property {string} file           - The file path of the section.
- * @property {SectionType} type      - The type of the section.
+ * @property {SectionType} [type]      - The type of the section.
+ * @property {string} fileType       - File type for the section.
+ * @property {string} [content]       - Content of the file when populated
  * @property {string} [notes]        - Notes associated with the section.
  * @property {string} [audience]     - The target audience of the section.
- * @property {string} [content]      - The content of the section.
  * @property {string} [author]       - The author of the section.
  * @property {string} [date]         - The date of the section.
  * @property {string[]} [genre]      - Genres associated with the section.
@@ -67,11 +68,27 @@
  */
 
 /**
+ * @typedef {Object} Asset
+ * @property {string} file - The file path of the asset.
+ * @property {string} type - The type of the asset.
+ */
+/**
  * @typedef {Object} Book
  * @property {Metadata} metadata      - The metadata of the book.
  * @property {Config} config          - The configuration of the book.
  * @property {BookSection[]} sections - The sections of the book.
+ * @property {Asset[]} assets         - The assets of the book.
  * @property {SectionIndex[]} [toc]   - The table of contents of the book.
+ */
+
+/**
+ * @typedef {function(string): Promise<string>} AsyncWriter
+ */
+
+/**
+ * @typedef {Object} EpubResult
+ * @property {AsyncWriter} write - Async function to write the EPUB file.
+ * @property {Book}        book  - The book data used to generate the EPUB.
  */
 
 export {}

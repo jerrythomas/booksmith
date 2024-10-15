@@ -30,6 +30,8 @@ export const DEFAULTS = {
 	metadata
 }
 
+export const CONFIG_FILE = 'book.json'
+
 export const metadataMapping = [
 	{ key: 'title', tag: 'dc:title' },
 	{ key: 'author', tag: 'dc:creator', multiple: true, count: true },

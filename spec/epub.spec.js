@@ -42,7 +42,7 @@ describe('generate', () => {
 					{ order: 6, file: 'contents/04-afterword.xhtml', title: 'Conclusion' }
 				]
 			}
-			const epubBook = epub(book, 'spec/fixtures/_build')
+			const epubBook = epub(book, 'spec/fixtures/html')
 			const result = await epubBook.write('spec/fixtures')
 			expect(result).toEqual('spec/fixtures/Test Book.epub')
 		})
@@ -62,7 +62,7 @@ describe('generate', () => {
 					{ order: 6, file: 'contents/04-afterword.xhtml', title: 'Conclusion' }
 				]
 			}
-			const epubBook = epub(book, 'spec/fixtures/_build')
+			const epubBook = epub(book, 'spec/fixtures/html')
 			const result = await epubBook.write('spec/fixtures')
 			expect(result).toEqual('spec/fixtures/Test Book.epub')
 		})

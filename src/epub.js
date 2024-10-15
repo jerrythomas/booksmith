@@ -42,7 +42,9 @@ export function getTableOfContents(content) {
  */
 export async function writeEpub(book, source, target) {
 	const zip = new JSZip()
-
+	// if (!fs.existsSync(target)) {
+	fs.mkdirSync(target, { recursive: true })
+	// }
 	EPUB_FILES.forEach((item) => {
 		zip.file(item.name, item.content)
 	})
@@ -50,8 +52,9 @@ export async function writeEpub(book, source, target) {
 	zip.file('content.opf', book.opf)
 	zip.file('toc.xhtml', book.toc)
 
-	book.files.forEach((file) => {
-		zip.file(file, fs.readFileSync(path.join(source, file)))
+	book.content.forEach(({ file, content }) => {
+		if (!content) content = fs.readFileSync(path.join(source, file))
+		zip.file(file, content)
 	})
 	book.assets.forEach((asset) => {
 		zip.file(asset.file, fs.readFileSync(path.join(source, asset.file)))
@@ -69,7 +72,7 @@ export async function writeEpub(book, source, target) {
  * Generates an EPUB file.
  *
  * @param {import('./types').Book} book - The book object.
- * @returns {Buffer} - The EPUB object
+ * @returns {import('./types').EpubResult} - The EPUB object
  */
 export function epub(book, source) {
 	book.id = uuid()
@@ -80,17 +83,13 @@ export function epub(book, source) {
 		toc: getTableOfContents(book.content),
 		opf: getOPF(book),
 		name: book.metadata.title,
-		files: book.content.map(({ file }) => file),
+		content: book.content,
+		// files: book.content.map(({ file }) => file),
 		assets: book.assets
 	}
 
-	async function write(target) {
-		const result = await writeEpub(data, source, target)
-		return result
-	}
-
 	return {
-		write,
+		write: (target) => writeEpub(data, source, target),
 		book: data
 	}
 }

@@ -1,5 +1,6 @@
 import { marked } from 'marked'
-
+import { epub } from './epub'
+import { scanBookFolder } from './book'
 /**
  * Creates a registry for converters.
  * @returns {Object} An object with register and get methods.
@@ -17,11 +18,32 @@ export function createRegistry() {
 	}
 }
 
+/**
+ * Converts an item with markdown content to HTML.
+ *
+ * @param {Object} item - The item to convert.
+ * @returns {Object} The converted content.
+ */
+export function markdownToHtml(item) {
+	const body = [
+		'<?xml version="1.0" encoding="UTF-8"?>',
+		'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">',
+		'<head>',
+		'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />',
+		`<title>${item.title}</title>`,
+		'</head>',
+		'<body>',
+		`${marked(item.content)}`,
+		'</body>',
+		'</html>'
+	]
+	return body.join('\n')
+}
 const TO_HTML_REGISTRY = createRegistry()
-TO_HTML_REGISTRY.register('md', marked)
-TO_HTML_REGISTRY.register('markdown', marked)
-TO_HTML_REGISTRY.register('Rmd', (content) => content) // Placeholder
-TO_HTML_REGISTRY.register('ipynb', (content) => content) // Placeholder
+TO_HTML_REGISTRY.register('md', markdownToHtml)
+TO_HTML_REGISTRY.register('markdown', ({ content }) => marked(content))
+TO_HTML_REGISTRY.register('Rmd', ({ content }) => content) // Placeholder
+TO_HTML_REGISTRY.register('ipynb', ({ content }) => content) // Placeholder
 
 /**
  * Converts a content item to HTML.
@@ -39,7 +61,22 @@ export function convertToHtml(item, registry = TO_HTML_REGISTRY) {
 	return {
 		...item,
 		type: 'html',
-		content: converter(item.content),
+		content: converter(item),
 		file: item.file.replace(new RegExp(`\\.${item.type}$`), '.html')
 	}
+}
+
+/**
+ * Generates a book from a folder
+ * @param {string} source               - Source folder to read from.
+ * @param {string} target               - Target folder to write to.
+ */
+export async function compile(source, target) {
+	const book = await scanBookFolder(source)
+
+	book.content = book.content.map((item) => convertToHtml(item))
+	// console.log(book)
+	const epubBook = epub(book, source)
+	const result = await epubBook.write(target)
+	return result
 }

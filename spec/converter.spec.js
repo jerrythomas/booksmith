@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { createRegistry, convertToHtml, TO_HTML_REGISTRY } from '../src/converter'
+import { describe, it, expect, afterAll } from 'vitest'
+import { createRegistry, convertToHtml, compile } from '../src/converter'
+import { rimraf } from 'rimraf'
 
 describe('HTML Converter', () => {
 	describe('createRegistry', () => {
@@ -27,6 +28,16 @@ describe('HTML Converter', () => {
 		it('should throw an error for unknown file types', () => {
 			const item = { type: 'unknown', content: '', file: 'test.unknown' }
 			expect(() => convertToHtml(item)).toThrow()
+		})
+	})
+
+	describe('compile', () => {
+		afterAll(() => {
+			rimraf.sync('spec/fixtures/build')
+		})
+		it('should compile an md book to epub', async () => {
+			const result = await compile('spec/fixtures/minimal', 'spec/fixtures/build')
+			expect(result).toEqual('spec/fixtures/build/A Minimal Book.epub')
 		})
 	})
 })
