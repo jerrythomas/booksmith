@@ -1,10 +1,10 @@
 import frontMatter from 'front-matter'
 import fs from 'fs/promises'
-import path, { basename } from 'path'
+import path from 'path'
 import { mergeDeepRight } from 'ramda'
 
 import { CONFIG_FILE, DEFAULTS } from './constants'
-import { itemSorter } from './utils'
+import { itemSorter, excludeFile } from './utils'
 
 /**
  * Reads a JSON file and returns its content as an object.
@@ -71,21 +71,23 @@ export async function scanBookFolder(source) {
 
 	files = files
 		.filter((file) => file.name !== CONFIG_FILE && !file.isDirectory())
-		.map((file) => path.join(path.relative(source, file.parentPath), file.name))
+		.map((file) => ({
+			file: path.join(path.relative(source, file.parentPath), file.name),
+			...getInfoFromName(file.name)
+		}))
+		.filter((item) => !excludeFile(item))
 
 	book.content = []
 	book.assets = []
 
-	for (const file of files) {
-		const filePath = path.join(source, file)
-		const info = getInfoFromName(basename(file))
-		info.file = file
+	for (const item of files) {
+		const filePath = path.join(source, item.file)
 
-		if (info.type === 'md') {
+		if (item.type === 'md') {
 			const { metadata, content } = await readMarkdownFile(filePath)
-			book.content.push({ ...info, ...metadata, content })
+			book.content.push({ ...item, ...metadata, content })
 		} else {
-			book.assets.push(info)
+			book.assets.push(item)
 		}
 	}
 

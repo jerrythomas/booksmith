@@ -72,13 +72,20 @@
  * @property {string} file - The file path of the asset.
  * @property {string} type - The type of the asset.
  */
+
+/**
+ * @typedef {'epub'|'pdf'|'folder'} BookTypes
+ */
+
 /**
  * @typedef {Object} Book
- * @property {Metadata} metadata      - The metadata of the book.
- * @property {Config} config          - The configuration of the book.
- * @property {BookSection[]} sections - The sections of the book.
- * @property {Asset[]} assets         - The assets of the book.
- * @property {SectionIndex[]} [toc]   - The table of contents of the book.
+ * @property {Config} config            - The configuration of the book.
+ * @property {Metadata} metadata        - The metadata of the book.
+ * @property {BookSection[]} [contents] - The sections of the book.
+ * @property {Asset[]} [assets]         - The assets of the book.
+ * @property {SectionIndex[]} [toc]     - The table of contents of the book.
+ * @property {BookTypes} [type]         - The type of the book.
+ * @property {string} [location]        - The file path of the book.
  */
 
 /**
@@ -91,4 +98,9 @@
  * @property {Book}        book  - The book data used to generate the EPUB.
  */
 
+/**
+ * @typedef {Object} FileItem
+ * @property {string} file           - The file path of the section.
+ * @property {string} type           - File type for the section.
+ */
 export {}

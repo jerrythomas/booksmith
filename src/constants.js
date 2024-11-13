@@ -33,13 +33,15 @@ export const DEFAULTS = {
 export const CONFIG_FILE = 'book.json'
 
 export const metadataMapping = [
+	{ key: 'id', tag: 'dc:identifier', scheme: 'uuid', name: 'book-id' },
 	{ key: 'title', tag: 'dc:title' },
-	{ key: 'author', tag: 'dc:creator', multiple: true, count: true },
+	{ key: 'author', tag: 'dc:creator', count: true },
 	{ key: 'description', tag: 'dc:description' },
 	{ key: 'audience', tag: 'meta', property: 'audience' },
-	{ key: 'genres', tag: 'meta', property: 'genre', multiple: true },
-	{ key: 'tags', tag: 'meta', property: 'tag', multiple: true },
+	{ key: 'genres', tag: 'meta', property: 'genre' },
+	{ key: 'tags', tag: 'meta', property: 'tag' },
 	{ key: 'keywords', tag: 'meta', property: 'keywords', join: true },
+	{ key: 'categories', tag: 'meta', property: 'categories', join: true },
 	{ key: 'publishedOn', tag: 'dc:date' },
 	{ key: 'publisher', tag: 'dc:publisher' },
 	{ key: 'ISBN', tag: 'dc:identifier', scheme: 'ISBN' },
@@ -49,7 +51,8 @@ export const metadataMapping = [
 	{ key: 'language', tag: 'dc:language' },
 	{ key: 'series', tag: 'meta', property: 'series' },
 	{ key: 'seriesNumber', tag: 'meta', property: 'seriesNumber' },
-	{ key: 'seriesCount', tag: 'meta', property: 'seriesCount' }
+	{ key: 'seriesCount', tag: 'meta', property: 'seriesCount' },
+	{ key: 'cover', tag: 'meta', property: 'cover', type: 'asset', ref: 'id' }
 ]
 
 export const EPUB_FILES = [
@@ -66,3 +69,18 @@ export const EPUB_FILES = [
 		].join('\n')
 	}
 ]
+
+export const EXCLUDED_FILE_TYPES = ['epub']
+export const EXCLUDED_FILES = [RegExp(/^\..+/), RegExp(/^Thumbs\.db$/, 'i'), RegExp(/^_build/, 'i')]
+export const MAX_FILES = 10000
+export const contentTypes = {
+	html: 'text/html',
+	htm: 'text/html',
+	xhtml: 'text/html',
+	css: 'text/css',
+	jpg: 'image/jpeg',
+	jpeg: 'image/jpeg',
+	png: 'image/png',
+	opf: 'application/oebps-package+xml',
+	ncx: 'application/x-dtbncx+xml'
+}

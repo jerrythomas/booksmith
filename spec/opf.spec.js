@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { getMetaTag, getMetadata, getManifest, getSpine, getOPF } from '../src/opf.js'
+import {
+	getMetaTag,
+	getMetadata,
+	getManifest,
+	getSpine,
+	getOPF,
+	convertOpfToMetadata,
+	extractMetaTag,
+	extractOPFMetadata
+} from '../src/opf.js'
 
 describe('opf', () => {
 	describe('getMetaTag', () => {
@@ -65,7 +74,7 @@ describe('opf', () => {
 				author: 'Test Author',
 				description: 'Test Description',
 				language: 'en',
-				cover: 'cover.jpg'
+				cover: 'cover-image'
 			}
 			const uuid = '12345'
 			const result = getMetadata(metadata, uuid)
@@ -73,6 +82,7 @@ describe('opf', () => {
 			expect(result).toContain('<dc:creator>Test Author</dc:creator>')
 			expect(result).toContain('<dc:description>Test Description</dc:description>')
 			expect(result).toContain('<dc:language>en</dc:language>')
+			expect(result).toContain('<meta name="cover" content="cover-image"/>')
 			expect(result).toContain(`urn:uuid:${uuid}`)
 		})
 
@@ -179,6 +189,105 @@ describe('opf', () => {
 			)
 			expect(result).toContain('<itemref idref="item-1"/>')
 			expect(result).toContain('<itemref idref="item-2"/>')
+		})
+	})
+	describe('convertOpfToMetadata', () => {
+		it('should convert OPF content from XML to the metadata structure', async () => {
+			const opfContent = `
+			     <xml>
+            <package>
+                <metadata>
+                    <dc:title>Test Book</dc:title>
+                    <dc:creator>Test Author</dc:creator>
+                </metadata>
+                <manifest>
+                    <item id="item1" href="chapter1.html" media-type="application/xhtml+xml"/>
+                    <item id="item2" href="chapter2.html" media-type="application/xhtml+xml"/>
+                    <item id="cover" href="cover.jpg" media-type="image/jpeg"/>
+                </manifest>
+                <spine>
+                    <itemref idref="item1"/>
+                    <itemref idref="item2"/>
+                </spine>
+            </package>
+          </xml>
+        `
+
+			const expected = {
+				metadata: {
+					'dc:title': 'Test Book',
+					'dc:creator': 'Test Author'
+				},
+				content: [
+					{ href: 'chapter1.html', order: 1, id: 'item1', 'media-type': 'application/xhtml+xml' },
+					{ href: 'chapter2.html', order: 2, id: 'item2', 'media-type': 'application/xhtml+xml' }
+				],
+				assets: [{ id: 'cover', href: 'cover.jpg', 'media-type': 'image/jpeg' }]
+			}
+
+			const result = await convertOpfToMetadata(opfContent)
+			expect(result).toEqual(expected)
+		})
+	})
+
+	describe('extractOPFMetadata', () => {
+		it('should correctly extract metadata from OPF JSON', () => {
+			const metadataJson = {
+				'dc:identifier': { id: 'book-id', _value: 'urn:uuid:8f89a7e9-5f9d-46a6-8587-d01134e7034f' },
+				'dc:title': 'Book Title',
+				'dc:creator': 'Author Name',
+				'dc:language': 'en',
+				'dc:description': 'A short description of the book',
+				meta: [
+					{ property: 'dcterms:modified', _value: '2024-10-02T00:00:00Z' },
+					{ name: 'cover', content: 'cover-image' },
+					{ property: 'keywords', content: 'tag1, tag2' },
+					{ property: 'categories', content: 'category1, category2' }
+				]
+			}
+
+			const expectedMetadata = {
+				id: 'urn:uuid:8f89a7e9-5f9d-46a6-8587-d01134e7034f',
+				title: 'Book Title',
+				author: 'Author Name',
+				language: 'en',
+				description: 'A short description of the book',
+				modified: '2024-10-02T00:00:00Z',
+				cover: 'cover-image',
+				keywords: ['tag1', 'tag2'],
+				categories: ['category1', 'category2']
+			}
+
+			expect(extractOPFMetadata(metadataJson)).toEqual(expectedMetadata)
+		})
+
+		it('should correctly handle multiple authors', () => {
+			const metadataJson = {
+				'dc:creator': [
+					{ id: 'author 1', _value: 'Author Name 1' },
+					{ id: 'author 2', _value: 'Author Name 2' }
+				]
+			}
+
+			const expectedMetadata = {
+				author: ['Author Name 1', 'Author Name 2']
+			}
+
+			expect(extractOPFMetadata(metadataJson)).toEqual(expectedMetadata)
+		})
+	})
+	describe('extractMetaTag', () => {
+		it('should correctly extract a meta tag', () => {
+			const metaTag = {
+				property: 'keywords',
+				content: 'tag1, tag2'
+			}
+
+			const expected = {
+				keywords: ['tag1', 'tag2']
+			}
+
+			expect(extractMetaTag(metaTag)).toEqual(expected)
 		})
 	})
 })

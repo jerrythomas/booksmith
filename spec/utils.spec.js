@@ -2,7 +2,15 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import fs from 'fs/promises'
 import path from 'path'
 import process from 'process'
-import { createFolder, createFile, toEpubDateFormat } from '../src/utils.js'
+import {
+	createFolder,
+	createFile,
+	toEpubDateFormat,
+	excludeFile,
+	itemSorter,
+	asArray
+} from '../src/utils.js'
+import { MAX_FILES } from '../src/constants.js'
 
 const testDir = path.join(process.cwd(), 'test-utils')
 
@@ -91,6 +99,50 @@ describe('utils', () => {
 			expect(() => toEpubDateFormat(invalidDate)).toThrow(
 				'Error converting date to EPUB format: Invalid time value'
 			)
+		})
+	})
+
+	describe('excludeFile', () => {
+		it('should exclude epub files', () => {
+			const item = { file: 'file1.epub', type: 'epub' }
+			const result = excludeFile(item)
+			expect(result).toBeTruthy()
+		})
+		it('should exclude files/folders matching patterns', () => {
+			expect(excludeFile({ file: '.DS_store' })).toBeTruthy()
+			expect(excludeFile({ file: '_build' })).toBeTruthy()
+			expect(excludeFile({ file: '_BUILD' })).toBeTruthy()
+			expect(excludeFile({ file: 'thumbs.db' })).toBeTruthy()
+			expect(excludeFile({ file: 'chapters/.config' })).toBeTruthy()
+			expect(excludeFile({ type: 'md', file: '.book/book.md' })).toBeTruthy()
+			expect(excludeFile({ type: 'md', file: 'xyz/.book/book.md' })).toBeTruthy()
+		})
+
+		it('should not exclude markdown file', () => {
+			expect(excludeFile({ type: 'md', file: 'chapter.md' })).toBeFalsy()
+			expect(excludeFile({ type: 'md', file: 'xyz/book/chapter2.md' })).toBeFalsy()
+		})
+	})
+
+	describe('itemSorter', () => {
+		it('should sort by orders if available', () => {
+			expect(itemSorter({ order: 1 }, { order: 2 })).toBe(-1)
+			expect(itemSorter({}, { order: 2 })).toBe(MAX_FILES - 2)
+			expect(itemSorter({ file: 'a' }, { file: 'a' })).toBe(0)
+		})
+		it('should sort by file ', () => {
+			expect(itemSorter({ file: 'a' }, { file: 'a' })).toBe(0)
+			expect(itemSorter({ file: 'a' }, { file: 'b' })).toBe(-1)
+			expect(itemSorter({ file: 'b' }, { file: 'a' })).toBe(1)
+		})
+	})
+
+	describe('asArray', () => {
+		it('should return an array if not already an array', () => {
+			expect(asArray('a')).toEqual(['a'])
+			expect(asArray(['a'])).toEqual(['a'])
+			expect(asArray(null)).toEqual([])
+			expect(asArray(undefined)).toEqual([])
 		})
 	})
 })

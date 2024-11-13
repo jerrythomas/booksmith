@@ -1,6 +1,6 @@
 import { metadataMapping } from './constants'
-import { toEpubDateFormat } from './utils'
-
+import { toEpubDateFormat, asArray } from './utils'
+import { convertXmlToJson } from './parser'
 /**
  * Generates a single dc: tag.
  *
@@ -9,9 +9,9 @@ import { toEpubDateFormat } from './utils'
  * @param {string} [scheme] - The scheme for the identifier.
  * @returns {string} - The generated dc: tag.
  */
-function generateSingleDcTag(tag, value, scheme) {
+function generateSingleDcTag(tag, value, scheme, name = null) {
 	if (scheme) {
-		return `<${tag} id="${scheme.toLowerCase()}">urn:${scheme.toLowerCase()}:${value}</${tag}>`
+		return `<${tag} id="${name ?? scheme.toLowerCase()}">urn:${scheme.toLowerCase()}:${value}</${tag}>`
 	}
 	return `<${tag}>${value}</${tag}>`
 }
@@ -46,7 +46,7 @@ function generateCountMetaTag(key, count) {
  * @returns {string[]} - An array of strings representing the tags.
  */
 function generateDcTags(mapping, value) {
-	const { tag, key, count, scheme } = mapping
+	const { tag, key, count, scheme, name } = mapping
 
 	if (Array.isArray(value)) {
 		const tags = generateMultipleDcTags(tag, key, value)
@@ -56,7 +56,7 @@ function generateDcTags(mapping, value) {
 		return tags
 	}
 
-	return [generateSingleDcTag(tag, value, scheme)]
+	return [generateSingleDcTag(tag, value, scheme, name)]
 }
 
 /**
@@ -67,14 +67,15 @@ function generateDcTags(mapping, value) {
  * @returns {string[]} - An array of strings representing the tags.
  */
 function generateMetaTags(mapping, value) {
-	const { property, join } = mapping
+	const { key, property, join } = mapping
+	const prop = property || key
 
 	if (join && Array.isArray(value)) {
-		return [`<meta name="${property}" content="${value.join(', ')}" count="${value.length}"/>`]
+		return [`<meta name="${prop}" content="${value.join(', ')}" count="${value.length}"/>`]
 	}
 
 	const items = Array.isArray(value) ? value : [value]
-	return items.map((item) => `<meta name="${property}" content="${item}"/>`)
+	return items.map((item) => `<meta name="${prop}" content="${item}"/>`)
 }
 
 /**
@@ -108,16 +109,20 @@ export function getMetadata(metadata, uuid) {
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id">',
 		'<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">',
-		` <dc:identifier id="book-id">urn:uuid:${uuid}</dc:identifier>`,
-		` <meta property="dcterms:modified">${toEpubDateFormat(new Date())}</meta>`
+		` <dc:identifier id="book-id">urn:uuid:${uuid}</dc:identifier>`
 	]
+
+	metadata.modified = metadata.modified || new Date()
+	metadataArray.push(
+		` <meta property="dcterms:modified">${toEpubDateFormat(metadata.modified)}</meta>`
+	)
 
 	metadataMapping.forEach((mapping) => {
 		const tags = getMetaTag(metadata, mapping)
 		metadataArray.push(...tags)
 	})
 
-	metadataArray.push(' <meta name="cover" content="cover-image"/>', '</metadata>')
+	metadataArray.push('</metadata>')
 	return metadataArray.join('\n')
 }
 
@@ -178,4 +183,93 @@ export function getOPF(book) {
 	const spineSection = getSpine(book.content)
 
 	return `${metadataSection}\n${manifestSection}\n${spineSection}\n</package>`
+}
+
+export function extractOPFMetadata(metadataJson) {
+	const metadata = {}
+
+	// Handle dc:identifier tags
+	const identifierTags = metadataJson['dc:identifier']
+	if (identifierTags) {
+		const identifiers = Array.isArray(identifierTags) ? identifierTags : [identifierTags]
+		identifiers.forEach((identifier) => {
+			const mapping = metadataMapping.find((m) => m.name === identifier.id)
+			if (mapping) {
+				metadata[mapping.key] = identifier._value.replace(
+					`urn:${mapping.scheme.toLowerCase()}:`,
+					''
+				)
+			}
+		})
+	}
+
+	// Handle other dc: tags
+	metadataMapping
+		.filter((m) => m.tag.startsWith('dc:') && m.tag !== 'dc:identifier')
+		.forEach((mapping) => {
+			const value = metadataJson[mapping.tag]
+			if (value) {
+				metadata[mapping.key] = Array.isArray(value) ? value.map((v) => v._value) : value._value
+			}
+		})
+
+	// Handle meta tags
+	const metaTags = metadataJson['meta']
+	if (metaTags) {
+		const metas = Array.isArray(metaTags) ? metaTags : [metaTags]
+		metas.forEach((meta) => {
+			const mapping = metadataMapping.find((m) => m.property === meta.property)
+			if (mapping) {
+				const content = meta.content.split(',').map((item) => item.trim())
+				metadata[mapping.key] = mapping.multiple ? content : content[0]
+			}
+		})
+	}
+
+	return metadata
+}
+
+export function extractMetaTag(metaTag) {
+	const result = {}
+
+	// Find the corresponding mapping
+	const mapping = metadataMapping.find((m) => m.property === metaTag.property)
+
+	if (mapping) {
+		const content = metaTag.content.split(',').map((item) => item.trim())
+		result[mapping.key] = mapping.join
+			? metaTag.content.split(',').map((item) => item.trim())
+			: content
+	}
+
+	return result
+}
+
+/**
+ * Converts OPF content from XML to the metadata structure.
+ *
+ * @param {string} opfContent - The OPF content as XML.
+ * @returns {Promise<Object>} - The metadata structure.
+ */
+export async function convertOpfToMetadata(opfContent) {
+	const opfJson = await convertXmlToJson(opfContent)
+
+	const metadata = opfJson.package.metadata
+	const manifest = asArray(opfJson.package.manifest.item)
+	const spine = asArray(opfJson.package.spine.itemref)
+
+	const content = manifest
+		.filter((item) => item['media-type'] === 'application/xhtml+xml')
+		.map((item) => ({
+			...item,
+			order: spine.findIndex((itemref) => itemref['idref'] === item['id']) + 1
+		}))
+
+	const assets = manifest.filter((item) => item['media-type'] !== 'application/xhtml+xml')
+
+	return {
+		metadata: metadata,
+		content: content,
+		assets: assets
+	}
 }

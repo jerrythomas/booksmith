@@ -1,5 +1,7 @@
 import fs from 'fs/promises'
-import { dirname } from 'path'
+import path, { dirname } from 'path'
+
+import { EXCLUDED_FILE_TYPES, EXCLUDED_FILES, MAX_FILES } from './constants'
 /**
  * Creates a folder if it doesn't exist.
  * @param {string} folderPath - The path of the folder to create.
@@ -53,9 +55,31 @@ export function toEpubDateFormat(date) {
  * @returns {Array<Object>} The sorted content.
  */
 export function itemSorter(a, b) {
-	const order = (a.order ?? Infinity) - (b.order ?? Infinity)
+	const order = (a.order ?? MAX_FILES) - (b.order ?? MAX_FILES)
 	if (order === 0) {
 		return a.file.localeCompare(b.file)
 	}
 	return order
+}
+
+/**
+ * Function that identifies if a file should be excluded from the book.
+ * @param {FileItem} item - An object representing a file.
+ * @returns {boolean} - True if the file should be excluded, false otherwise.
+ */
+export function excludeFile(item) {
+	if (EXCLUDED_FILE_TYPES.includes(item.type)) return true
+	const parts = item.file.split(path.sep)
+
+	return EXCLUDED_FILES.some((pattern) => parts.some((part) => pattern.test(part)))
+}
+
+/**
+ * Function to cast an item as an array if it is not already.
+ * @param {any} item - The item to cast as an array.
+ * @returns {Array<any>} - The item as an array.
+ */
+export function asArray(item) {
+	if (item === null || item === undefined) return []
+	return Array.isArray(item) ? item : [item]
 }
