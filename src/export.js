@@ -3,19 +3,35 @@ import { clone, pick } from 'ramda'
 import path from 'path'
 import fs from 'fs'
 import AdmZip from 'adm-zip'
-import xml2js from 'xml2js'
+import { convertXmlToJson } from './parser'
+// import xml2js from 'xml2js'
 
+/**
+ * Parses the XML content.
+ *
+ * @param {string} extension : The extension of the file
+ * @param {string} content   : The content of the XML file
+ * @returns {Object}         : The parsed XML content
+ */
 function parseXML(extension, content) {
 	const extensions = ['opf', 'ncx']
-	let output = { content }
+	const output = { content }
 	if (extensions.includes(extension)) {
-		xml2js.parseString(content, (error, result) => {
-			output = { error, content: error ? content : result }
-		})
+		try {
+			output.content = convertXmlToJson(content)
+		} catch (e) {
+			output.error = e.message
+		}
 	}
 	return output
 }
 
+/**
+ * Reads the contents of an EPUB file.
+ *
+ * @param {string} filepath - The file path.
+ * @returns {Array<Object>} - An array of file objects.
+ */
 export function readEpubZip(filepath) {
 	const zip = new AdmZip(filepath)
 	const zipEntries = zip.getEntries()
@@ -41,6 +57,12 @@ export function readEpubZip(filepath) {
 	return files
 }
 
+/**
+ * Organizes the files into contents, assets, and metadata.
+ *
+ * @param {Array<Object>} files - An array of file objects.
+ * @returns {Object} - An object with contents, assets, and metadata arrays.
+ */
 function organizeFiles(files) {
 	const contents = []
 	const assets = []
@@ -90,30 +112,35 @@ export function readBook(filepath) {
 	return data
 }
 
-export function readToc(content) {
-	let data = {}
-	xml2js.parseString(content, (error, result) => {
-		if (!error) {
-			data = result.package
-		}
-	})
+/**
+ * Reads the table of contents.
+ *
+ * @param {string} content - The content of the toc file.
+ * @returns {Promise<Object>} - The table of contents.
+ */
+export async function readToc(content) {
+	const data = await convertXmlToJson(content)
+	const manifestItems = Array.isArray(data.manifest.item)
+		? data.manifest.item
+		: [data.manifest.item]
 
-	const items = data.manifest.reduce(
+	const items = manifestItems.reduce(
 		(acc, cur) => ({
 			...acc,
-			[cur.$.id]: {
-				id: cur.$.id,
-				href: cur.$.href,
-				mediaType: cur.$.mediaType
+			[cur.id]: {
+				id: cur.id,
+				href: cur.href,
+				mediaType: cur.media_type
 			}
 		}),
 		{}
 	)
-	data.spline.forEach((item, index) => {
-		items[item.$.idref].order = index + 1
+	const itemrefs = Array.isArray(data.spine.itemref) ? data.spine.itemref : [data.spine.itemref]
+	itemrefs.forEach((item, index) => {
+		items[item.idref].order = index + 1
 	})
 
-	return { table: Object.values(items), metadata }
+	return { table: Object.values(items), metadata: data }
 }
 
 /**

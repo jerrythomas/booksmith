@@ -7,10 +7,26 @@ import {
 	getOPF,
 	convertOpfToMetadata,
 	extractMetaTag,
-	extractOPFMetadata
+	extractOPFMetadata,
+	extractDCMetadata,
+	extractIdentifierTags,
+	generateMetaTags
 } from '../src/opf.js'
 
 describe('opf', () => {
+	describe('generateMetaTags', () => {
+		it('should generate joined tags', () => {
+			const result = generateMetaTags({ key: 'keywords', join: true }, ['tag1', 'tag2'])
+			expect(result).toEqual(['<meta name="keywords" content="tag1, tag2" count="2"/>'])
+		})
+		it('should generate multiple meta tags', () => {
+			const result = generateMetaTags({ key: 'keywords' }, ['tag1', 'tag2'])
+			expect(result).toEqual([
+				'<meta name="keywords" content="tag1"/>',
+				'<meta name="keywords" content="tag2"/>'
+			])
+		})
+	})
 	describe('getMetaTag', () => {
 		it('should convert a single metadata attribute to a dc: tag', () => {
 			const metadata = { title: 'Test Book' }
@@ -231,6 +247,39 @@ describe('opf', () => {
 	})
 
 	describe('extractOPFMetadata', () => {
+		const metadataJson = {
+			'dc:identifier': { id: 'book-id', _value: 'urn:uuid:8f89a7e9-5f9d-46a6-8587-d01134e7034f' },
+			'dc:title': 'Book Title',
+			'dc:creator': 'Author Name',
+			'dc:language': 'en',
+			'dc:description': 'A short description of the book',
+			meta: [
+				{ property: 'dcterms:modified', _value: '2024-10-02T00:00:00Z' },
+				{ name: 'cover', content: 'cover-image' },
+				{ property: 'keywords', content: 'tag1, tag2' },
+				{ property: 'categories', content: 'category1, category2' }
+			]
+		}
+		describe('extractDCMetadata', () => {
+			it('should extract the dc:tags', () => {
+				const result = extractDCMetadata(metadataJson)
+				expect(result).toEqual({
+					author: 'Author Name',
+					description: 'A short description of the book',
+					language: 'en',
+					title: 'Book Title'
+				})
+			})
+		})
+		describe('extractIdentifiers', () => {
+			it('should extract the identifiers', () => {
+				const result = extractIdentifierTags(metadataJson)
+				expect(result).toEqual({
+					id: '8f89a7e9-5f9d-46a6-8587-d01134e7034f'
+				})
+			})
+		})
+
 		it('should correctly extract metadata from OPF JSON', () => {
 			const metadataJson = {
 				'dc:identifier': { id: 'book-id', _value: 'urn:uuid:8f89a7e9-5f9d-46a6-8587-d01134e7034f' },
@@ -240,14 +289,14 @@ describe('opf', () => {
 				'dc:description': 'A short description of the book',
 				meta: [
 					{ property: 'dcterms:modified', _value: '2024-10-02T00:00:00Z' },
-					{ name: 'cover', content: 'cover-image' },
+					{ property: 'cover', content: 'cover-image' },
 					{ property: 'keywords', content: 'tag1, tag2' },
 					{ property: 'categories', content: 'category1, category2' }
 				]
 			}
 
 			const expectedMetadata = {
-				id: 'urn:uuid:8f89a7e9-5f9d-46a6-8587-d01134e7034f',
+				id: '8f89a7e9-5f9d-46a6-8587-d01134e7034f',
 				title: 'Book Title',
 				author: 'Author Name',
 				language: 'en',
@@ -275,9 +324,20 @@ describe('opf', () => {
 
 			expect(extractOPFMetadata(metadataJson)).toEqual(expectedMetadata)
 		})
+		it('should correctly handle single metadata', () => {
+			const metadataJson = {
+				meta: { property: 'keywords', content: 'tag1, tag2' }
+			}
+
+			const expectedMetadata = {
+				keywords: ['tag1', 'tag2']
+			}
+
+			expect(extractOPFMetadata(metadataJson)).toEqual(expectedMetadata)
+		})
 	})
 	describe('extractMetaTag', () => {
-		it('should correctly extract a meta tag', () => {
+		it('should correctly extract keywords tag', () => {
 			const metaTag = {
 				property: 'keywords',
 				content: 'tag1, tag2'
@@ -285,6 +345,30 @@ describe('opf', () => {
 
 			const expected = {
 				keywords: ['tag1', 'tag2']
+			}
+
+			expect(extractMetaTag(metaTag)).toEqual(expected)
+		})
+		it('should correctly extract catgeories tag', () => {
+			const metaTag = {
+				property: 'categories',
+				content: 'ctg1, ctg2'
+			}
+
+			const expected = {
+				categories: ['ctg1', 'ctg2']
+			}
+
+			expect(extractMetaTag(metaTag)).toEqual(expected)
+		})
+		it('should correctly extractmodified on', () => {
+			const metaTag = {
+				property: 'dcterms:modified',
+				_value: '2024-10-02T00:00:00Z'
+			}
+
+			const expected = {
+				modified: '2024-10-02T00:00:00Z'
 			}
 
 			expect(extractMetaTag(metaTag)).toEqual(expected)

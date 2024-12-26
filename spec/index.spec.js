@@ -3,9 +3,18 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import path from 'path'
 import process from 'process'
 import { initialize } from '../src/init.js'
+import { compile } from '../src/converter.js'
+import { readBook } from '../src/book.js'
 
 vi.mock('../src/init.js', () => ({
 	initialize: vi.fn()
+}))
+vi.mock('../src/book.js', () => ({
+	readBook: vi.fn().mockReturnValue(Promise.resolve({ title: 'A Book' }))
+}))
+
+vi.mock('../src/converter.js', () => ({
+	compile: vi.fn()
 }))
 
 const originalArgv = process.argv
@@ -46,6 +55,15 @@ describe('CLI', () => {
 		)
 	})
 
+	it('should compile a new book ', async () => {
+		const testFolder = 'test-folder'
+		process.argv = ['node', 'index.js', 'compile', '--folder', testFolder]
+
+		await import('../src/index.js')
+		expect(console.log).toHaveBeenCalledWith(`Compiling book to epub`)
+		expect(readBook).toHaveBeenCalledWith('.')
+		expect(compile).toHaveBeenCalledWith({ title: 'A Book' }, '.', path.resolve('./build'))
+	})
 	// it('should handle errors during initialization', async () => {
 	//   const testFolder = 'test-folder'
 	//   const errorMessage = 'Initialization error'

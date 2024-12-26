@@ -49,6 +49,7 @@ export const metadataMapping = [
 	{ key: 'ASIN', tag: 'dc:identifier', scheme: 'ASIN' },
 	{ key: 'license', tag: 'dc:rights' },
 	{ key: 'language', tag: 'dc:language' },
+	{ key: 'modified', tag: 'meta', property: 'dcterms:modified' },
 	{ key: 'series', tag: 'meta', property: 'series' },
 	{ key: 'seriesNumber', tag: 'meta', property: 'seriesNumber' },
 	{ key: 'seriesCount', tag: 'meta', property: 'seriesCount' },

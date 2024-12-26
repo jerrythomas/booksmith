@@ -51,9 +51,6 @@ importers:
       '@eslint/js':
         specifier: ^9.11.1
         version: 9.11.1
-      '@types/bun':
-        specifier: latest
-        version: 1.1.10
       '@types/ramda':
         specifier: ^0.30.2
         version: 0.30.2
@@ -413,9 +410,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@types/bun@1.1.10':
-    resolution: {integrity: sha512-76KYVSwrHwr9zsnk6oLXOGs9KvyBg3U066GLO4rk6JZk1ypEPGCUDZ5yOiESyIHWs9cx9iC8r01utYN32XdmgA==}
-
   '@types/eslint@9.6.1':
     resolution: {integrity: sha512-FXx2pKgId/WyYo2jXw63kk7/+TY7u7AziEJxJAnSFzHlqTAS3Ync6SvgYAN/k4/PQpnnVuzoMuVnByKK2qp0ag==}
 
@@ -433,9 +427,6 @@ packages:
 
   '@types/ramda@0.30.2':
     resolution: {integrity: sha512-PyzHvjCalm2BRYjAU6nIB3TprYwMNOUY/7P/N8bSzp9W/yM2YrtGtAnnVtaCNSeOZ8DzKyFDvaqQs7LnWwwmBA==}
-
-  '@types/ws@8.5.12':
-    resolution: {integrity: sha512-3tPRkv1EtkDpzlgyKyI8pGsGZAGPEaXeu0DOj5DI25Ja91bdAYddYHbADRYVrZMRbfW+1l5YwXVDKohDJNQxkQ==}
 
   '@vitest/coverage-v8@2.1.2':
     resolution: {integrity: sha512-b7kHrFrs2urS0cOk5N10lttI8UdJ/yP3nB4JYTREvR5o18cR99yPpK4gK8oQgI42BVv0ILWYUSYB7AXkAUDc0g==}
@@ -551,9 +542,6 @@ packages:
     resolution: {integrity: sha512-lQlPfyS0GrO5FaOODK+OHQxfCT+6/xWfd3Zt8dzsmzm69RWQfh5fAU9igmeZWOzK/s+4vL+gQLo3yw474ntBZw==}
     engines: {node: '>=10'}
     hasBin: true
-
-  bun-types@1.1.29:
-    resolution: {integrity: sha512-En3/TzSPMPyl5UlUB1MHzHpcrZDakTm7mS203eLoX1fBoEa3PW+aSS8GAqVJ7Is/m34Z5ogL+ECniLY0uDaCPw==}
 
   c12@1.11.2:
     resolution: {integrity: sha512-oBs8a4uvSDO9dm8b7OCFW7+dgtVrwmwnrVXYzLm43ta7ep2jCn/0MhoUFygIWtxhyy6+/MG7/agvpY0U1Iemew==}
@@ -1805,10 +1793,6 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.24.0':
     optional: true
 
-  '@types/bun@1.1.10':
-    dependencies:
-      bun-types: 1.1.29
-
   '@types/eslint@9.6.1':
     dependencies:
       '@types/estree': 1.0.6
@@ -1825,14 +1809,11 @@ snapshots:
   '@types/node@20.12.14':
     dependencies:
       undici-types: 5.26.5
+    optional: true
 
   '@types/ramda@0.30.2':
     dependencies:
       types-ramda: 0.30.1
-
-  '@types/ws@8.5.12':
-    dependencies:
-      '@types/node': 20.12.14
 
   '@vitest/coverage-v8@2.1.2(vitest@2.1.2(@types/node@20.12.14)(jsdom@25.0.1))':
     dependencies:
@@ -1968,11 +1949,6 @@ snapshots:
       semver: 7.6.3
     transitivePeerDependencies:
       - magicast
-
-  bun-types@1.1.29:
-    dependencies:
-      '@types/node': 20.12.14
-      '@types/ws': 8.5.12
 
   c12@1.11.2(magicast@0.3.5):
     dependencies:
@@ -2869,7 +2845,8 @@ snapshots:
 
   ufo@1.5.4: {}
 
-  undici-types@5.26.5: {}
+  undici-types@5.26.5:
+    optional: true
 
   uri-js@4.4.1:
     dependencies:

@@ -66,7 +66,7 @@ function generateDcTags(mapping, value) {
  * @param {string|string[]} value - The metadata value.
  * @returns {string[]} - An array of strings representing the tags.
  */
-function generateMetaTags(mapping, value) {
+export function generateMetaTags(mapping, value) {
 	const { key, property, join } = mapping
 	const prop = property || key
 
@@ -185,50 +185,49 @@ export function getOPF(book) {
 	return `${metadataSection}\n${manifestSection}\n${spineSection}\n</package>`
 }
 
-export function extractOPFMetadata(metadataJson) {
+/**
+ * Identifies dc: tags in the metadata object and extracts them.
+ *
+ * @param {Object} metadataJson
+ * @returns {Object}
+ */
+export function extractDCMetadata(metadataJson) {
 	const metadata = {}
-
-	// Handle dc:identifier tags
-	const identifierTags = metadataJson['dc:identifier']
-	if (identifierTags) {
-		const identifiers = Array.isArray(identifierTags) ? identifierTags : [identifierTags]
-		identifiers.forEach((identifier) => {
-			const mapping = metadataMapping.find((m) => m.name === identifier.id)
-			if (mapping) {
-				metadata[mapping.key] = identifier._value.replace(
-					`urn:${mapping.scheme.toLowerCase()}:`,
-					''
-				)
-			}
-		})
-	}
-
-	// Handle other dc: tags
 	metadataMapping
 		.filter((m) => m.tag.startsWith('dc:') && m.tag !== 'dc:identifier')
 		.forEach((mapping) => {
 			const value = metadataJson[mapping.tag]
 			if (value) {
-				metadata[mapping.key] = Array.isArray(value) ? value.map((v) => v._value) : value._value
+				metadata[mapping.key] = Array.isArray(value) ? value.map((v) => v._value) : value
 			}
 		})
+	return metadata
+}
 
-	// Handle meta tags
-	const metaTags = metadataJson['meta']
-	if (metaTags) {
-		const metas = Array.isArray(metaTags) ? metaTags : [metaTags]
-		metas.forEach((meta) => {
-			const mapping = metadataMapping.find((m) => m.property === meta.property)
-			if (mapping) {
-				const content = meta.content.split(',').map((item) => item.trim())
-				metadata[mapping.key] = mapping.multiple ? content : content[0]
-			}
-		})
-	}
+/**
+ * Extract Identifier tags from the OPF metadata
+ * @param {Object} metadataJson - The metadata object from the OPF file.
+ * @returns {Object} - The extracted metadata.
+ */
+export function extractIdentifierTags(metadataJson) {
+	const identifierTags = metadataJson['dc:identifier'] ?? []
+	const metadata = {}
+	const identifiers = Array.isArray(identifierTags) ? identifierTags : [identifierTags]
+	identifiers.forEach((identifier) => {
+		const mapping = metadataMapping.find((m) => m.name === identifier.id)
+		if (mapping) {
+			metadata[mapping.key] = identifier._value.replace(`urn:${mapping.scheme.toLowerCase()}:`, '')
+		}
+	})
 
 	return metadata
 }
 
+/**
+ *
+ * @param {*} metaTag
+ * @returns
+ */
 export function extractMetaTag(metaTag) {
 	const result = {}
 
@@ -236,13 +235,31 @@ export function extractMetaTag(metaTag) {
 	const mapping = metadataMapping.find((m) => m.property === metaTag.property)
 
 	if (mapping) {
-		const content = metaTag.content.split(',').map((item) => item.trim())
-		result[mapping.key] = mapping.join
-			? metaTag.content.split(',').map((item) => item.trim())
-			: content
+		const content = metaTag.content ?? metaTag._value
+		result[mapping.key] = mapping.join ? content.split(',').map((item) => item.trim()) : content
 	}
 
 	return result
+}
+/**
+ * Extracts metadata from the OPF file.
+ *
+ * @param {Object} metadataJson - The metadata object from the OPF file.
+ * @returns {Object} - The extracted metadata.
+ */
+export function extractOPFMetadata(metadataJson) {
+	let metadata = {}
+
+	metadata = { ...extractIdentifierTags(metadataJson), ...extractDCMetadata(metadataJson) }
+
+	const metaTags = metadataJson['meta'] ?? []
+	const metas = Array.isArray(metaTags) ? metaTags : [metaTags]
+	metas.forEach((meta) => {
+		const result = extractMetaTag(meta)
+		metadata = { ...metadata, ...result }
+	})
+
+	return metadata
 }
 
 /**
