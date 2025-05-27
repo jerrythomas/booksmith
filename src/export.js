@@ -4,7 +4,6 @@ import path from 'path'
 import fs from 'fs'
 import AdmZip from 'adm-zip'
 import { convertXmlToJson } from './parser'
-// import xml2js from 'xml2js'
 
 /**
  * Parses the XML content.
@@ -13,15 +12,11 @@ import { convertXmlToJson } from './parser'
  * @param {string} content   : The content of the XML file
  * @returns {Object}         : The parsed XML content
  */
-function parseXML(extension, content) {
+export function parseXML(extension, content) {
 	const extensions = ['opf', 'ncx']
 	const output = { content }
 	if (extensions.includes(extension)) {
-		try {
-			output.content = convertXmlToJson(content)
-		} catch (e) {
-			output.error = e.message
-		}
+		output.content = convertXmlToJson(content)
 	}
 	return output
 }
@@ -63,7 +58,7 @@ export function readEpubZip(filepath) {
  * @param {Array<Object>} files - An array of file objects.
  * @returns {Object} - An object with contents, assets, and metadata arrays.
  */
-function organizeFiles(files) {
+export function organizeFiles(files) {
 	const contents = []
 	const assets = []
 	const metadata = []
@@ -79,7 +74,6 @@ function organizeFiles(files) {
 			}
 		}
 	})
-	// console.log(contents.length, assets.length, metadata.length)
 	return { contents, assets, metadata }
 }
 
@@ -118,8 +112,8 @@ export function readBook(filepath) {
  * @param {string} content - The content of the toc file.
  * @returns {Promise<Object>} - The table of contents.
  */
-export async function readToc(content) {
-	const data = await convertXmlToJson(content)
+export function readToc(content) {
+	const data = convertXmlToJson(content)
 	const manifestItems = Array.isArray(data.manifest.item)
 		? data.manifest.item
 		: [data.manifest.item]

@@ -12,7 +12,8 @@
   "repository": "git://github.com/jerrythomas/booksmith.git",
   "scripts": {
     "test": "vitest",
-    "coverage": "vitest --coverage",
+    "test:ci": "vitest run",
+    "coverage": "vitest run --coverage",
     "lint": "eslint . --fix",
     "format": "prettier --write .",
     "bump": "bumpp",

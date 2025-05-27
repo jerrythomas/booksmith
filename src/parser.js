@@ -51,7 +51,16 @@ export function convertKeysToSnakeCase(obj) {
  * @param {*} data
  * @returns
  */
-export async function convertXmlToJson(data) {
-	const result = await parser.parseStringPromise(data)
+export function convertXmlToJson(data) {
+	let result = null
+	// let parsed = false
+
+	parser.parseString(data, (_, json) => {
+		result = json
+		// parsed = true
+	})
+	// while (!parsed) {
+	// 	// intentionally left empty to synchronize async call.
+	// }
 	return convertKeysToSnakeCase(result)
 }
