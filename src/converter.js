@@ -1,6 +1,6 @@
 import { marked } from 'marked'
-import { epub } from './epub'
-import { scanBookFolder } from './book'
+import { epub } from './epub.js'
+import { scanBookFolder } from './book.js'
 /**
  * Creates a registry for converters.
  * @returns {Object} An object with register and get methods.
@@ -71,8 +71,8 @@ export function convertToHtml(item, registry = TO_HTML_REGISTRY) {
  * @param {string} source               - Source folder to read from.
  * @param {string} target               - Target folder to write to.
  */
-export async function compile(source, target) {
-	const book = await scanBookFolder(source)
+export async function compile(book, source, target) {
+	// const book = await scanBookFolder(source)
 
 	book.content = book.content.map((item) => convertToHtml(item))
 	// console.log(book)

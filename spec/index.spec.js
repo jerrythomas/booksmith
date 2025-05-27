@@ -4,13 +4,13 @@ import path from 'path'
 import process from 'process'
 import { initialize } from '../src/init.js'
 import { compile } from '../src/converter.js'
-import { readBook } from '../src/book.js'
+import { scanBookFolder } from '../src/book.js'
 
 vi.mock('../src/init.js', () => ({
 	initialize: vi.fn()
 }))
 vi.mock('../src/book.js', () => ({
-	readBook: vi.fn().mockReturnValue(Promise.resolve({ title: 'A Book' }))
+	scanBookFolder: vi.fn().mockReturnValue(Promise.resolve({ title: 'A Book' }))
 }))
 
 vi.mock('../src/converter.js', () => ({
@@ -61,7 +61,7 @@ describe('CLI', () => {
 
 		await import('../src/index.js')
 		expect(console.log).toHaveBeenCalledWith(`Compiling book to epub`)
-		expect(readBook).toHaveBeenCalledWith('.')
+		expect(scanBookFolder).toHaveBeenCalledWith('.')
 		expect(compile).toHaveBeenCalledWith({ title: 'A Book' }, '.', path.resolve('./build'))
 	})
 	// it('should handle errors during initialization', async () => {

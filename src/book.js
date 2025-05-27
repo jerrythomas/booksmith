@@ -3,8 +3,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import { mergeDeepRight } from 'ramda'
 
-import { CONFIG_FILE, DEFAULTS } from './constants'
-import { itemSorter, excludeFile } from './utils'
+import { CONFIG_FILE, DEFAULTS } from './constants.js'
+import { itemSorter, excludeFile } from './utils.js'
 
 /**
  * Reads a JSON file and returns its content as an object.

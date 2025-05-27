@@ -1,9 +1,9 @@
 import { v4 as uuid } from '@lukeed/uuid/secure'
-import { getOPF } from './opf'
+import { getOPF } from './opf.js'
 import JSZip from 'jszip'
 import fs from 'fs'
 import path from 'path'
-import { EPUB_FILES } from './constants'
+import { EPUB_FILES } from './constants.js'
 
 /**
  * Generates a Table of Contents (TOC) document as XHTML.

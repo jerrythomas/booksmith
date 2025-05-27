@@ -1,5 +1,6 @@
 import { describe, it, expect, afterAll } from 'vitest'
 import { createRegistry, convertToHtml, compile } from '../src/converter'
+import { scanBookFolder } from '../src/book'
 import { rimraf } from 'rimraf'
 
 describe('HTML Converter', () => {
@@ -36,7 +37,8 @@ describe('HTML Converter', () => {
 			rimraf.sync('spec/fixtures/build')
 		})
 		it('should compile an md book to epub', async () => {
-			const result = await compile('spec/fixtures/minimal', 'spec/fixtures/build')
+			const book = await scanBookFolder('spec/fixtures/minimal')
+			const result = await compile(book, 'spec/fixtures/minimal', 'spec/fixtures/build')
 			expect(result).toEqual('spec/fixtures/build/A Minimal Book.epub')
 		})
 	})

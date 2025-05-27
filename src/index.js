@@ -7,7 +7,7 @@ import fs from 'fs'
 import process from 'process'
 import { initialize } from './init.js'
 import { compile } from './converter.js'
-import { readBook } from './book.js'
+import { scanBookFolder } from './book.js'
 const prog = sade('bookdown')
 
 prog
@@ -27,8 +27,7 @@ prog
 	.describe('Compile the book')
 	.action(async (opts) => {
 		console.log(`Compiling book to ${opts.format}`)
-		const book = await readBook(opts.input)
-
+		const book = await scanBookFolder(opts.input)
 		const target = path.resolve(path.join(opts.input, 'build'))
 		fs.mkdirSync(target, { recursive: true })
 		await compile(book, opts.input, target)

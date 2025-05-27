@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import path, { dirname } from 'path'
 
-import { EXCLUDED_FILE_TYPES, EXCLUDED_FILES, MAX_FILES } from './constants'
+import { EXCLUDED_FILE_TYPES, EXCLUDED_FILES, MAX_FILES } from './constants.js'
 /**
  * Creates a folder if it doesn't exist.
  * @param {string} folderPath - The path of the folder to create.

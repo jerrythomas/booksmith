@@ -1,6 +1,6 @@
-import { metadataMapping } from './constants'
-import { toEpubDateFormat, asArray } from './utils'
-import { convertXmlToJson } from './parser'
+import { metadataMapping } from './constants.js'
+import { toEpubDateFormat, asArray } from './utils.js'
+import { convertXmlToJson } from './parser.js'
 /**
  * Generates a single dc: tag.
  *
