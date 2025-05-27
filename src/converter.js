@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { epub } from './epub.js'
-import { scanBookFolder } from './book.js'
+// import { scanBookFolder } from './book.js'
 /**
  * Creates a registry for converters.
  * @returns {Object} An object with register and get methods.

@@ -8,7 +8,10 @@ import process from 'process'
 import { initialize } from './init.js'
 import { compile } from './converter.js'
 import { scanBookFolder } from './book.js'
+import pkg from '../package.json' with { type: 'json' }
 const prog = sade('bookdown')
+
+prog.version(pkg.version)
 
 prog
 	.command('init')

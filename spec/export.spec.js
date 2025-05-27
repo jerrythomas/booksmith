@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import {
-	book,
-	readEpubZip,
-	readBook,
-	readToc,
-	exportBook,
-	organizeFiles,
-	parseXML
-} from '../src/export.js'
+import { book, readEpubZip, readBook, readToc, organizeFiles, parseXML } from '../src/export.js'
 import { DEFAULTS } from '../src/constants.js'
 import { omit } from 'ramda'
 
