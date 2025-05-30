@@ -3,7 +3,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { mergeDeepRight } from 'ramda'
 
-import { CONFIG_FILE, DEFAULTS } from './constants.js'
+import { CONFIG_FILE, DEFAULTS, contentTypes } from './constants.js'
 import { itemSorter, excludeFile } from './utils.js'
 
 /**
@@ -39,7 +39,26 @@ export function getInfoFromName(name) {
 	if (!match) return { order: null, title: name }
 	const order = match[2] ? Number(match[2]) : null
 	const title = match[3]
-	const type = match[4]
+	const ext = match[4]
+	
+	// Determine correct MIME type based on extension
+	let type;
+	if (ext === 'jpg' || ext === 'jpeg') {
+		type = 'image/jpeg';
+	} else if (ext === 'png') {
+		type = 'image/png';
+	} else if (ext === 'gif') {
+		type = 'image/gif';
+	} else if (ext === 'svg') {
+		type = 'image/svg+xml';
+	} else if (ext === 'webp') {
+		type = 'image/webp';
+	} else if (contentTypes[ext]) {
+		type = contentTypes[ext];
+	} else {
+		type = ext;
+	}
+	
 	return { order, title, type }
 }
 
@@ -57,6 +76,73 @@ export async function readMarkdownFile(filePath) {
 		metadata: attributes,
 		content: body
 	}
+}
+
+/**
+ * Process special assets referenced in the metadata like cover images.
+ * 
+ * @param {Object} book - The book object with metadata.
+ * @param {string} source - The base directory of the book.
+ * @returns {Object} The updated book object with special assets included.
+ */
+export async function processSpecialAssets(book, source) {
+	// Handle cover image if specified in metadata
+	if (book.metadata.cover && typeof book.metadata.cover === 'string') {
+		try {
+			// Resolve the path to the cover image
+			const coverPath = book.metadata.cover;
+			const fullCoverPath = path.join(source, coverPath);
+			
+			// Check if file exists
+			await fs.access(fullCoverPath);
+			
+			// Get file extension for mime type
+			const ext = path.extname(coverPath).substring(1).toLowerCase();
+			
+			// Determine the MIME type based on file extension
+			let mimeType;
+			if (contentTypes[ext]) {
+				// Use predefined content type if available
+				mimeType = contentTypes[ext];
+			} else if (ext.match(/^jpe?g$/i)) {
+				// Handle jpg/jpeg variants
+				mimeType = 'image/jpeg';
+			} else if (ext === 'svg') {
+				// Handle SVG format specifically
+				mimeType = 'image/svg+xml';
+			} else if (ext.match(/^(png|gif|webp)$/i)) {
+				// Handle other common image formats
+				mimeType = `image/${ext}`;
+			} else {
+				// Default to generic image type
+				mimeType = 'image/png';
+				console.warn(`Unknown image type: ${ext}. Defaulting to image/png`);
+			}
+			
+			// Check if cover already exists in assets
+			const coverExists = book.assets.some(asset => asset.file === coverPath);
+			
+			if (!coverExists) {
+				// Add cover to assets with standard ID
+				book.assets.push({
+					file: coverPath,
+					id: 'cover-image',
+					type: mimeType
+				});
+			} else {
+				// If cover exists, ensure it has the correct ID for OPF reference
+				const existingCover = book.assets.find(asset => asset.file === coverPath);
+				if (existingCover && existingCover.id !== 'cover-image') {
+					console.log(`Setting ID 'cover-image' for existing cover asset: ${coverPath}`);
+					existingCover.id = 'cover-image';
+				}
+			}
+		} catch (error) {
+			console.warn(`Cover image specified in metadata (${book.metadata.cover}) not found: ${error.message}`);
+		}
+	}
+	
+	return book;
 }
 
 /**
@@ -94,6 +180,9 @@ export async function scanBookFolder(source) {
 	book.content = book.content
 		.sort((a, b) => itemSorter(a, b))
 		.map((item, index) => ({ ...item, order: index + 1 }))
+
+	// Process special assets like cover images
+	await processSpecialAssets(book, source);
 
 	return book
 }
