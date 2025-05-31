@@ -74,7 +74,7 @@ export function convertToHtml(item, registry = TO_HTML_REGISTRY) {
 export async function compile(book, source, target) {
 	// const book = await scanBookFolder(source)
 
-	book.content = book.content.map((item) => convertToHtml(item))
+	book.contents = book.contents.map((item) => convertToHtml(item))
 	// console.log(book)
 	const epubBook = epub(book, source)
 	const result = await epubBook.write(target)

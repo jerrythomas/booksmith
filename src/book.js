@@ -163,7 +163,7 @@ export async function scanBookFolder(source) {
 		}))
 		.filter((item) => !excludeFile(item))
 
-	book.content = []
+	book.contents = []
 	book.assets = []
 
 	for (const item of files) {
@@ -171,13 +171,13 @@ export async function scanBookFolder(source) {
 
 		if (item.type === 'md') {
 			const { metadata, content } = await readMarkdownFile(filePath)
-			book.content.push({ ...item, ...metadata, content })
+			book.contents.push({ ...item, ...metadata, content })
 		} else {
 			book.assets.push(item)
 		}
 	}
 
-	book.content = book.content
+	book.contents = book.contents
 		.sort((a, b) => itemSorter(a, b))
 		.map((item, index) => ({ ...item, order: index + 1 }))
 

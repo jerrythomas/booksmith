@@ -78,7 +78,7 @@ describe('book', () => {
 				toc: false,
 				tocLevels: 1
 			})
-			expect(book.content).toHaveLength(6)
+			expect(book.contents).toHaveLength(6)
 			expect(book.assets).toHaveLength(1)
 		})
 

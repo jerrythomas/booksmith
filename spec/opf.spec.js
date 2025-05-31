@@ -143,13 +143,13 @@ describe('opf', () => {
 
 	describe('getManifest', () => {
 		it('should generate the manifest section of the OPF file', () => {
-			const content = [
+			const contents = [
 				{ file: 'chapter1.xhtml', order: 1 },
 				{ file: 'chapter2.xhtml', order: 2 }
 			]
 			const assets = [{ file: 'cover.jpg', id: 'cover-image', type: 'image/jpeg' }]
 
-			const result = getManifest(content, assets)
+			const result = getManifest(contents, assets)
 			expect(result).toContain('<item id="cover-image" href="cover.jpg" media-type="image/jpeg"/>')
 			expect(result).toContain(
 				'<item id="item-1" href="chapter1.xhtml" media-type="application/xhtml+xml"/>'
@@ -162,8 +162,8 @@ describe('opf', () => {
 
 	describe('getSpine', () => {
 		it('should generate the spine section of the OPF file', () => {
-			const content = [{ order: 1 }, { order: 2 }]
-			const result = getSpine(content)
+			const contents = [{ order: 1 }, { order: 2 }]
+			const result = getSpine(contents)
 			expect(result).toContain('<itemref idref="item-1"/>')
 			expect(result).toContain('<itemref idref="item-2"/>')
 		})
@@ -180,7 +180,7 @@ describe('opf', () => {
 					cover: 'cover.jpg'
 				},
 				assets: [{ file: 'cover.jpg', id: 'cover-image', type: 'image/jpeg' }],
-				content: [
+				contents: [
 					{ file: 'chapter1.xhtml', order: 1, title: 'Chapter 1' },
 					{ file: 'chapter2.xhtml', order: 2, title: 'Chapter 2' }
 				],

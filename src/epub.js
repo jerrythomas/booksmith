@@ -8,10 +8,10 @@ import { EPUB_FILES } from './constants.js'
 /**
  * Generates a Table of Contents (TOC) document as XHTML.
  *
- * @param {Array<Object>} content - An array of content objects with `file` and `title` properties.
+ * @param {Array<Object>} contents - An array of content objects with `file` and `title` properties.
  * @returns {string} - XHTML formatted TOC.
  */
-export function getTableOfContents(content) {
+export function getTableOfContents(contents) {
 	const header = [
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<!DOCTYPE html>',
@@ -24,7 +24,7 @@ export function getTableOfContents(content) {
 
 	const footer = `</ol></nav></body></html>`
 
-	const items = content
+	const items = contents
 		.map((item) => {
 			return `<li><a href="${item.file}">${item.title}</a></li>`
 		})
@@ -52,12 +52,16 @@ export async function writeEpub(book, source, target) {
 	zip.file('content.opf', book.opf)
 	zip.file('toc.xhtml', book.toc)
 
-	book.content.forEach(({ file, content }) => {
+	book.contents.forEach(({ file, content }) => {
 		if (!content) content = fs.readFileSync(path.join(source, file))
 		zip.file(file, content)
 	})
 	book.assets.forEach((asset) => {
-		zip.file(asset.file, fs.readFileSync(path.join(source, asset.file)))
+		if (asset.content) {
+			zip.file(asset.file, asset.content)
+		} else {
+			zip.file(asset.file, fs.readFileSync(path.join(source, asset.file)))
+		}
 	})
 
 	const filename = path.join(target, `${book.name}.epub`)
@@ -80,11 +84,11 @@ export function epub(book, source) {
 	book.assets = book.assets ?? []
 
 	const data = {
-		toc: getTableOfContents(book.content),
+		toc: getTableOfContents(book.contents),
 		opf: getOPF(book),
 		name: book.metadata.title,
-		content: book.content,
-		// files: book.content.map(({ file }) => file),
+		contents: book.contents,
+		// files: book.contents.map(({ file }) => file),
 		assets: book.assets
 	}
 

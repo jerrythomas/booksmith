@@ -129,18 +129,18 @@ export function getMetadata(metadata, uuid) {
 /**
  * Generates the manifest section of the OPF file.
  *
- * @param {Array<Object>} content - An array of content objects with `file` and `order` properties.
+ * @param {Array<Object>} contents - An array of content objects with `file` and `order` properties.
  * @param {string} coverPath - The path to the cover image.
  * @returns {string} - The manifest section as a string.
  */
-export function getManifest(content, assets) {
+export function getManifest(contents, assets) {
 	const manifestArray = ['<manifest>']
 
 	assets.forEach((asset) => {
 		manifestArray.push(`<item id="${asset.id}" href="${asset.file}" media-type="${asset.type}"/>`)
 	})
 
-	content.forEach((item) => {
+	contents.forEach((item) => {
 		manifestArray.push(
 			`<item id="item-${item.order}" href="${item.file}" media-type="application/xhtml+xml"/>`
 		)
@@ -157,13 +157,13 @@ export function getManifest(content, assets) {
 /**
  * Generates the spine section of the OPF file.
  *
- * @param {Array<Object>} content - An array of content objects with `order` properties.
+ * @param {Array<Object>} contents - An array of content objects with `order` properties.
  * @returns {string} - The spine section as a string.
  */
-export function getSpine(content) {
+export function getSpine(contents) {
 	const spineArray = ['<spine>']
 
-	content.forEach((item) => {
+	contents.forEach((item) => {
 		spineArray.push(`<itemref idref="item-${item.order}"/>`)
 	})
 
@@ -179,8 +179,8 @@ export function getSpine(content) {
  */
 export function getOPF(book) {
 	const metadataSection = getMetadata(book.metadata, book.id)
-	const manifestSection = getManifest(book.content, book.assets)
-	const spineSection = getSpine(book.content)
+	const manifestSection = getManifest(book.contents, book.assets)
+	const spineSection = getSpine(book.contents)
 
 	return `${metadataSection}\n${manifestSection}\n${spineSection}\n</package>`
 }
