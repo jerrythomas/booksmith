@@ -42,7 +42,7 @@
   "dependencies": {
     "@lukeed/uuid": "^2.0.1",
     "@types/eslint__js": "^9.14.0",
-    "adm-zip": "^0.5.16",
+    "adm-zip": "^0.6.1",
     "eslint": "^9.27.0",
     "front-matter": "^4.0.2",
     "jsdom": "^26.1.0",
